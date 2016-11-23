@@ -72,14 +72,10 @@ class Upload implements SaveInterface {
     {
         # upload compressed file to s3
         $command = $this->binary .
-            " s3 sync $filename s3://" . 
-            $this->bucket . 
-            "/" . 
-            $this->key;
+            ' s3 sync ' . $filename .' s3://' . $this->bucket . DIRECTORY_SEPARATOR . $this->key
+            . ' --only-show-errors';
         LogEntry::logEntry($command);
-        $response = $this->connection->executeCommand(
-            $command
-        );
+        $response = $this->connection->executeCommand($command);
         LogEntry::logEntry('STDOUT: ' . $response->stdout());
         LogEntry::logEntry('STDERR: ' . $response->stderr());
     }
@@ -96,11 +92,9 @@ class Upload implements SaveInterface {
 
         $response = $this->connection->writeFileContents("$file", $serialized);
         $command = $this->binary .
-            " s3 cp $file s3://" . $this->bucket .
-            DIRECTORY_SEPARATOR .
-            $filename;
+            ' s3 cp ' . $file . ' s3://' . $this->bucket . DIRECTORY_SEPARATOR . $filename
+            . ' --only-show-errors';
         LogEntry::logEntry('Upload latest backup info to S3 with command: ' . $command);
-
         $response = $this->connection->executeCommand($command,true);
         LogEntry::logEntry('STDOUT: ' . $response->stdout());
         LogEntry::logEntry('STDERR: ' . $response->stderr());

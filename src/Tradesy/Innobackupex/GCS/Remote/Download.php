@@ -40,6 +40,7 @@ class Download implements LoadInterface {
         $this->concurrency              = $concurrency;
         $this->testSave();
     }
+
     public function testSave()
     {
         $command = "which " . $this->binary;
@@ -68,61 +69,28 @@ class Download implements LoadInterface {
 
     public function save($filename)
     {
-        # upload compressed file to s3
-        $command = $this->binary ." s3 sync $filename s3://" . $this->bucket . "/" . $this->key;
-        LogEntry::logEntry($command);
-        $response = $this->connection->executeCommand(
-            $command
-        );
-        LogEntry::logEntry('STDOUT: ' . $response->stdout());
-        LogEntry::logEntry('STDERR: ' . $response->stderr());
-
     }
+
     public function cleanup()
     {
-        /* $command = "sudo rm -f " . $this->getFullPathToBackup();
-        return $this->connection->executeCommand(
-            $command
-        );
-        */
     }
 
-    public function saveBackupInfo(\Tradesy\Innobackupex\Backup\Info $info){
-        $serialized = serialize($info);
-
-        $response = $this->connection->writeFileContents("/tmp/temporary_backup_info", $serialized);
-        $command = $this->binary . " s3 cp /tmp/temporary_backup_info s3://" . $this->bucket . "/tradesy_percona_backup_info";
-        LogEntry::logEntry('Upload latest backup info to S3 with command: ' . $command);
-
-        $response = $this->connection->executeCommand($command);
-        LogEntry::logEntry('STDOUT: ' . $response->stdout());
-        LogEntry::logEntry('STDERR: ' . $response->stderr());
-
+    public function saveBackupInfo(\Tradesy\Innobackupex\Backup\Info $info)
+    {
     }
+
     public function load( \Tradesy\Innobackupex\Backup\Info $info, $filename)
     {
-        $filename = $info->getLatestFullBackup();
-        # upload compressed file to s3
-        $command = $this->binary
-            ." s3 sync $filename s3://" . $this->bucket . "/" . $this->key;
-        LogEntry::logEntry($command);
-        $response = $this->connection->executeCommand(
-            $command
-        );
-        LogEntry::logEntry('STDOUT: ' . $response->stdout());
-        LogEntry::logEntry('STDERR: ' . $response->stderr());
-
     }
 
     public function getBackupInfo($backup_info_filename)
     {
-
     }
 
     public function verify()
     {
-
     }
+
     /**
      * @param mixed $key
      */

@@ -73,28 +73,22 @@ class Download implements LoadInterface {
     {
         $filename = $info->getLatestFullBackup();
         # upload compressed file to s3
-        $command = $this->binary 
-            ." s3 sync $filename s3://" . $this->bucket . "/" . $this->key;
+        $command = $this->binary . 
+            ' s3 sync ' . $filename . ' s3://' . $this->bucket . DIRECTORY_SEPARATOR . $this->key
+            . ' --only-show-errors';
         LogEntry::logEntry($command);
-        $response = $this->connection->executeCommand(
-            $command
-        );
+        $response = $this->connection->executeCommand($command);
         LogEntry::logEntry('STDOUT: ' . $response->stdout());
         LogEntry::logEntry('STDERR: ' . $response->stderr());
 
     }
+    
     public function cleanup()
     {
-        /* $command = "sudo rm -f " . $this->getFullPathToBackup();
-        return $this->connection->executeCommand(
-            $command
-        );
-        */
     }
 
     public function getBackupInfo($backup_info_filename)
     {
-
     }
 
     public function verify()

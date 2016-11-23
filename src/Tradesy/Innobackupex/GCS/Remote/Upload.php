@@ -53,8 +53,7 @@ class Upload implements SaveInterface {
                 0
             );
         }
-        $command = $this->binary .
-                    " ls -b gs://" . $this->bucket . " | grep -c " . $this->bucket;
+        $command = $this->binary . ' -q ls -b gs://' . $this->bucket . ' | grep -c ' . $this->bucket;
         LogEntry::logEntry($command);
         $response = $this->connection->executeCommand($command);
         if(intval($response->stdout())==0){
@@ -70,9 +69,7 @@ class Upload implements SaveInterface {
     {
         // -m option for parallel
         $command = $this->binary .
-            " -m rsync -r  $filename gs://" .
-            $this->bucket . "/" . 
-            $this->key;
+            ' -q -m rsync -r  ' . $filename . ' gs://' . $this->bucket . DIRECTORY_SEPARATOR . $this->key;
         LogEntry::logEntry($command);
         $response = $this->connection->executeCommand(
             $command
@@ -83,11 +80,6 @@ class Upload implements SaveInterface {
     }
     public function cleanup()
     {
-        /* $command = "sudo rm -f " . $this->getFullPathToBackup();
-        return $this->connection->executeCommand(
-            $command
-        );
-        */
     }
 
     public function saveBackupInfo(\Tradesy\Innobackupex\Backup\Info $info, $filename){
@@ -121,6 +113,7 @@ class Upload implements SaveInterface {
     {
 
     }
+
     /**
      * @param mixed $key
      */
