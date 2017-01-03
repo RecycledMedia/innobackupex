@@ -74,26 +74,52 @@ trait Traits
 
         }
     }
+
+    /**
+     * Tries to decrypt files for the given directory
+     *
+     * @param $directory
+     *
+     * @return bool
+     */
     public function decryptionRequired($directory){
         $files = $this->getConnection()->scandir($directory);
-        $pattern = '/.*\.xbcrypt$/';
-        $matches = preg_grep($pattern,$files);
-        $do_these_files_exist = str_replace(".xbcrypt", "" , $matches);
-        foreach($do_these_files_exist as $file){
-            if(!in_array($file,$files))
-                return true;
+
+        if ($files === false) {
+            LogEntry::logEntry('An Error occurred while determining decryption of folder ' . $directory);
+            return false;
         }
+
+        if (is_array($files) && count($files)) {
+            $pattern = '/.*\.xbcrypt$/';
+            $matches = preg_grep($pattern,$files);
+            $do_these_files_exist = str_replace(".xbcrypt", "" , $matches);
+            foreach($do_these_files_exist as $file){
+                if(!in_array($file,$files))
+                    return true;
+            }
+        }
+
         return false;
     }
 
     public function decompressionRequired($directory){
         $files = $this->getConnection()->scandir($directory);
-        $pattern = '/.*\.qp$/';
-        $matches = preg_grep($pattern,$files);
-        $do_these_files_exist = str_replace(".qp", "" , $matches);
-        foreach($do_these_files_exist as $file){
-            if(!in_array($file,$files))
-                return true;
+
+        if ($files === false) {
+            LogEntry::logEntry('An Error occurred while determining decompression of folder ' . $directory);
+            return false;
+        }
+
+        if (is_array($files) && count($files)) {
+            $pattern = '/.*\.qp$/';
+            $matches = preg_grep($pattern, $files);
+            $do_these_files_exist = str_replace(".qp", "", $matches);
+            foreach ($do_these_files_exist as $file) {
+                if (!in_array($file, $files)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
