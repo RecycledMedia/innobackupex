@@ -2,6 +2,7 @@
 
 namespace Tradesy\Innobackupex\SSH;
 
+use Tradesy\Innobackupex\ConnectionInterface;
 use Tradesy\Innobackupex\Exceptions\SSH2AuthenticationException;
 use Tradesy\Innobackupex\Exceptions\ServerNotListeningException;
 use Tradesy\Innobackupex\Exceptions\SSH2ConnectionException;
@@ -12,7 +13,7 @@ use Tradesy\Innobackupex\LogEntry;
  * Class Connection
  * @package Tradesy\Innobackupex
  */
-class Connection implements \Tradesy\Innobackupex\ConnectionInterface
+class Connection implements ConnectionInterface
 {
     /**
      * @var Configuration
@@ -62,37 +63,54 @@ class Connection implements \Tradesy\Innobackupex\ConnectionInterface
         $this->verifySSHServerListening();
         $this->verifyConnection();
     }
+
     /**
+     * Gets the ssh connection if connection succeeds
+     * 
+     * @param bool $force_reconnect
+     * 
      * @return resource
+     * 
+     * @throws SSH2ConnectionException
      */
     public function getConnection($force_reconnect = false)
     {
         if ($this->authenticated && !$force_reconnect) {
             return $this->connection;
         }
+       
         $this->connection = ssh2_connect(
             $this->config->host(),
             $this->config->port(),
             $this->config->options()
         );
+        
         if (!$this->connection) {
             throw new SSH2ConnectionException(
-                "Connection to SSH Server failed unreachable at host: " . $this->config->port() .
-                ":" . $this->config->port(),
+                'Connection to SSH Server failed at host: ' . $this->config->host() . ':' . $this->config->port(),
                 0
             );
         }
 
         return $this->connection;
     }
+
     /**
+     * Executes a command at the remote server
+     *
+     * @param $command
+     * @param bool $no_sudo
+     *
      * @return ConnectionResponse
+     *
+     * @throws SSH2ConnectionException
      */
-    public function executeCommand($command, $no_sudo = false )
+    public function executeCommand($command, $no_sudo = false)
     {
+        LogEntry::logEntry('Executing command ' . $command);
         $stream = ssh2_exec(
             $this->getConnection(),
-            ($this->isSudoAll() && !$no_sudo ? "sudo " : "" ) . $command ,
+            ($this->isSudoAll() && !$no_sudo ? 'sudo ' : '' ) . $command ,
             true
         );
         $stderrStream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
@@ -137,13 +155,16 @@ class Connection implements \Tradesy\Innobackupex\ConnectionInterface
      * @param string $file
      * @param string $contents
      * @param int $mode
+     * 
+     * @return bool|void
+     * 
      * @throws SSH2ConnectionException
      */
     public function writeFileContents($file, $contents, $mode=0644)
     {
         LogEntry::logEntry('Writing file: ' . $file);
-        $temp_file = tempnam($this->getTemporaryDirectoryPath(),"");
-        file_put_contents($temp_file,$contents);
+        $temp_file = tempnam($this->getTemporaryDirectoryPath(), "");
+        file_put_contents($temp_file, $contents);
         ssh2_scp_send($this->getConnection(), $temp_file, $file, $mode);
         unlink($temp_file);
     }
@@ -152,10 +173,8 @@ class Connection implements \Tradesy\Innobackupex\ConnectionInterface
      * @throws SSH2AuthenticationException
      * @throws SSH2ConnectionException
      */
-    protected
-    function verifyCredentials()
+    protected function verifyCredentials()
     {
-
         $resource = ssh2_auth_pubkey_file(
             $this->getConnection(),
             $this->config->user(),
@@ -177,8 +196,7 @@ class Connection implements \Tradesy\Innobackupex\ConnectionInterface
      * @return bool
      * @throws ServerNotListeningException
      */
-    protected
-    function verifySSHServerListening()
+    protected function verifySSHServerListening()
     {
         $serverConn = @stream_socket_client(
             "tcp://" . $this->config->host() . ":" . $this->config->port(),
@@ -199,8 +217,7 @@ class Connection implements \Tradesy\Innobackupex\ConnectionInterface
     /**
      * @throws SSH2AuthenticationException
      */
-    protected
-    function verifyConnection()
+    protected function verifyConnection()
     {
         if ($this->authenticated) {
             return;
@@ -213,11 +230,10 @@ class Connection implements \Tradesy\Innobackupex\ConnectionInterface
      * @param string $file
      * @return boolean
      */
-    public
-    function file_exists($file){
+    public function file_exists($file){
         // Note: This might cause segfault if file doesn't exist due to ssh2 lib bug
         $sftp = ssh2_sftp($this->getConnection());
-        return file_exists('ssh2.sftp://' . $sftp . $file);
+        return file_exists('ssh2.sftp://' . intval($sftp) . $file);
     }
     
     /**
@@ -226,6 +242,6 @@ class Connection implements \Tradesy\Innobackupex\ConnectionInterface
      */
     public function scandir($directory){
         $sftp = ssh2_sftp($this->getConnection());
-        return scandir('ssh2.sftp://' . $sftp . $directory);
+        return scandir('ssh2.sftp://' . intval($sftp) . $directory);
     }
 }
