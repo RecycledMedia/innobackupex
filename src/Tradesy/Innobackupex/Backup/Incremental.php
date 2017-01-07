@@ -83,7 +83,7 @@ class Incremental extends AbstractBackup
         LogEntry::logEntry('STDERR: ' . $err);
 
         // Return true when stdout finished correctly
-        return (strpos($out, 'completed OK!') !== false);
+        return (strpos(str_replace('prints "completed OK!".', '', $out), 'completed OK!') !== false);
     }
 
     public function SaveBackupInfo()

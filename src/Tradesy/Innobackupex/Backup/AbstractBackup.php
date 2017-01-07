@@ -426,6 +426,7 @@ abstract class AbstractBackup
     {
         $remote_file = $this->getBasebackupDirectory() . DIRECTORY_SEPARATOR .
             $this->getBackupInfoFilename();
+
         if ($this->getConnection()->file_exists($remote_file)) {
             $file_contents = $this->getConnection()->getFileContents($remote_file);
             LogEntry::logEntry('Contents from file "' . $remote_file . '": ' . $file_contents);

@@ -23,8 +23,7 @@ trait Traits
             /*
              * If compressed and encrypted, decrypt first
              */
-            if ($this->decryptionRequired($basedir)
-            ) {
+            if ($this->decryptionRequired($basedir)) {
                 $decryption_string = '';
                 // Create a random string longer than key so it will not replace any text if not found.
                 $encryption_key = substr(
@@ -53,17 +52,13 @@ trait Traits
                 LogEntry::logEntry('STDOUT: ' . str_replace($encryption_key, '********', $response->stdout()));
                 LogEntry::logEntry('STDERR: ' . str_replace($encryption_key, '********', $response->stderr()));
             }
+
             /*
              * Now if compressed, decompress
              * xtrabackup_checkpoints doesn't get compressed, so check with different file
              * such as xtrabackup_info
              */
-
-            $xtrabackup_file = $basedir . DIRECTORY_SEPARATOR . "xtrabackup_info";
-
-
-            if ($this->decompressionRequired($basedir)
-            ) {
+            if ($this->decompressionRequired($basedir)) {
                 $command = "innobackupex " .
                     " --decompress" .
                     " --parallel " . $this->parallel_threads .
@@ -88,7 +83,9 @@ trait Traits
      * @return bool
      */
     public function decryptionRequired($directory){
+        $this->getConnection()->setSudoAll(true);
         $files = $this->getConnection()->scandir($directory);
+        $this->getConnection()->setSudoAll(false);
 
         if ($files === false) {
             LogEntry::logEntry('An Error occurred while determining decryption of folder ' . $directory);
@@ -100,6 +97,7 @@ trait Traits
             $matches = preg_grep($pattern,$files);
             $do_these_files_exist = str_replace(".xbcrypt", "" , $matches);
             foreach($do_these_files_exist as $file){
+                $file = trim($file);
                 if(!in_array($file,$files))
                     return true;
             }
@@ -109,7 +107,9 @@ trait Traits
     }
 
     public function decompressionRequired($directory){
+        $this->getConnection()->setSudoAll(true);
         $files = $this->getConnection()->scandir($directory);
+        $this->getConnection()->setSudoAll(false);
 
         if ($files === false) {
             LogEntry::logEntry('An Error occurred while determining decompression of folder ' . $directory);

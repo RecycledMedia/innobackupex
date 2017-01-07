@@ -85,11 +85,11 @@ class Connection implements ConnectionInterface
 
     /**
      * Gets the ssh connection if connection succeeds
-     * 
+     *
      * @param bool $force_reconnect
-     * 
+     *
      * @return resource
-     * 
+     *
      * @throws SSH2ConnectionException
      */
     public function getConnection($force_reconnect = false)
@@ -97,13 +97,13 @@ class Connection implements ConnectionInterface
         if ($this->authenticated && !$force_reconnect) {
             return $this->connection;
         }
-       
+
         $this->connection = ssh2_connect(
             $this->config->host(),
             $this->config->port(),
             $this->config->options()
         );
-        
+
         if (!$this->connection) {
             throw new SSH2ConnectionException(
                 'Connection to SSH Server failed at host: ' . $this->config->host() . ':' . $this->config->port(),
@@ -181,9 +181,9 @@ class Connection implements ConnectionInterface
      * @param string $file
      * @param string $contents
      * @param int $mode
-     * 
+     *
      * @return bool|void
-     * 
+     *
      * @throws SSH2ConnectionException
      */
     public function writeFileContents($file, $contents, $mode=0644)
@@ -260,17 +260,21 @@ class Connection implements ConnectionInterface
      * @return boolean
      */
     public function file_exists($file){
-        // Note: This might cause segfault if file doesn't exist due to ssh2 lib bug
-        $sftp = ssh2_sftp($this->getConnection());
-        return file_exists('ssh2.sftp://' . intval($sftp) . $file);
+        // Check if file exists
+        $command = 'if test -f ' . $file .'; then echo "exists"; fi';
+        $result = $this->executeCommand($command);
+
+        return (trim($result->stdout()) === 'exists');
     }
-    
+
     /**
      * @param string $directory
      * @return mixed
      */
     public function scandir($directory){
-        $sftp = ssh2_sftp($this->getConnection());
-        return scandir('ssh2.sftp://' . intval($sftp) . $directory);
+        // Get a list of files
+        $result = $this->executeCommand('ls -1 ' . $directory . ' | tr \'\n\' \'\0\' | xargs -0 -n 1 basename');
+
+        return array_map('trim', explode("\n", $result->stdout()));
     }
 }
