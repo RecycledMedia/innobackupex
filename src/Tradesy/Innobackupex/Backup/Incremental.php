@@ -31,9 +31,6 @@ class Incremental extends AbstractBackup
         $enc_class = "\Tradesy\Innobackupex\Encryption\Configuration";
 
 
-        $encryption_string = (($this->getEncryptionConfiguration() instanceof $enc_class) ?
-            $this->getEncryptionConfiguration()->getConfigurationString() : "");
-
         $basedir = $this->BackupInfo->getBaseBackupDirectory() . DIRECTORY_SEPARATOR .
             (is_null($this->BackupInfo->getLatestIncrementalBackup()) ?
                 $this->BackupInfo->getLatestFullBackup() :

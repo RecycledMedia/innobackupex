@@ -45,7 +45,10 @@ trait Traits
                     " $basedir";
 
                 LogEntry::logEntry('Decrypting command: ' . str_replace($encryption_key, '********', $command));
-                $response = $this->getConnection()->executeCommand($command,true);
+                $this->getConnection()->setSudoAll(true);
+                $response = $this->getConnection()->mute()->executeCommand($command);
+                $this->getConnection()->unmute()->setSudoAll(false);
+
 
                 LogEntry::logEntry('STDOUT: ' . str_replace($encryption_key, '********', $response->stdout()));
                 LogEntry::logEntry('STDERR: ' . str_replace($encryption_key, '********', $response->stderr()));
@@ -66,7 +69,9 @@ trait Traits
                     " --parallel " . $this->parallel_threads .
                     " $basedir";
                 LogEntry::logEntry('Decompressing command: ' . $command);
-                $response = $this->getConnection()->executeCommand($command,true);
+                $this->getConnection()->setSudoAll(true);
+                $response = $this->getConnection()->mute()->executeCommand($command);
+                $this->getConnection()->unmute()->setSudoAll(false);
 
                 LogEntry::logEntry('STDOUT: ' . $response->stdout());
                 LogEntry::logEntry('STDERR: ' . $response->stderr());
