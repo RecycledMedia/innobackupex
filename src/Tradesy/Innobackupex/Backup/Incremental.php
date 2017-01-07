@@ -75,9 +75,10 @@ class Incremental extends AbstractBackup
 
         $command = str_replace('{MYSQL_USER}', $user, $command);
         $command = str_replace('{MYSQL_PASSWORD}', $password, $command);
-        
+
+        $this->getConnection()->setSudoAll(true);
         $response = $this->getConnection()->mute()->executeCommand($command);
-        $this->getConnection()->unmute();
+        $this->getConnection()->unmute()->setSudoAll(false);
 
         $out = str_replace($encryption_key, '********', $response->stdout());
         $err = str_replace($encryption_key, '********', $response->stderr());

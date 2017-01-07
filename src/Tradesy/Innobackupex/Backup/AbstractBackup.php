@@ -360,6 +360,7 @@ abstract class AbstractBackup
     public function Backup()
     {
         $this->test_innobackupex_exist();
+        $this->createBaseDir();
         $this->start();
         if ($this->PerformBackup()) {
             LogEntry::logEntry('Backup finished successfully');
@@ -391,6 +392,17 @@ abstract class AbstractBackup
             LogEntry::logEntry('[Error] Backup had issues');
         }
         $this->end();
+    }
+
+    protected function createBaseDir()
+    {
+        $command = 'if test -d ' . $this->getBasebackupDirectory() .'; then echo "exists"; fi';
+        $result = $this->getConnection()->executeCommand($command);
+
+        if (trim($result->stdout()) !== 'exists') {
+            LogEntry::logEntry('Creating dir ' . $this->getBasebackupDirectory());
+            $this->getConnection()->executeCommand('mkdir ' . $this->getBasebackupDirectory());
+        }
     }
 
     /**
