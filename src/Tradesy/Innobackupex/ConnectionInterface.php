@@ -28,12 +28,23 @@ interface ConnectionInterface
      * @return boolean
      */
     function file_exists($file);
+
     /**
      * @return resource
      */
     function getConnection();
 
-    function verify();
+    public function verify();
 
-    function scandir($directory);
+    public function scandir($directory);
+
+    /**
+     * @return ConnectionInterface
+     */
+    public function mute();
+
+    /**
+     * @return ConnectionInterface
+     */
+    public function unmute();
 }

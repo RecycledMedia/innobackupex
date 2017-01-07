@@ -134,4 +134,14 @@ class Connection implements \Tradesy\Innobackupex\ConnectionInterface
     public function scandir($directory){
         return scandir($directory);
     }
+
+    public function mute()
+    {
+        // TODO: Implement mute() method.
+    }
+
+    public function unmute()
+    {
+        // TODO: Implement unmute() method.
+    }
 }

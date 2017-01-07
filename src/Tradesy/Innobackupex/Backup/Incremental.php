@@ -76,7 +76,8 @@ class Incremental extends AbstractBackup
         $command = str_replace('{MYSQL_USER}', $user, $command);
         $command = str_replace('{MYSQL_PASSWORD}', $password, $command);
         
-        $response = $this->getConnection()->executeCommand($command);
+        $response = $this->getConnection()->mute()->executeCommand($command);
+        $this->getConnection()->unmute();
 
         $out = str_replace($encryption_key, '********', $response->stdout());
         $err = str_replace($encryption_key, '********', $response->stderr());
@@ -84,7 +85,7 @@ class Incremental extends AbstractBackup
         LogEntry::logEntry('STDERR: ' . $err);
 
         // Return true when stdout finished correctly
-        return (strpos($out, 'innobackupex: completed OK!') !== false);
+        return (strpos($out, 'completed OK!') !== false);
     }
 
     public function SaveBackupInfo()

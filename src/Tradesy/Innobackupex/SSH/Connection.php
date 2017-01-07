@@ -34,6 +34,11 @@ class Connection implements ConnectionInterface
     protected $sudo_all = false;
 
     /**
+     * @var bool
+     */
+    protected $verbosity = true;
+
+    /**
      * @return boolean
      */
     public function isSudoAll()
@@ -53,6 +58,20 @@ class Connection implements ConnectionInterface
     {
         $this->config = $config;
         $this->verify();
+    }
+
+    public function mute()
+    {
+        $this->verbosity = false;
+
+        return $this;
+    }
+
+    public function unmute()
+    {
+        $this->verbosity = true;
+
+        return $this;
     }
 
     /**
@@ -107,7 +126,10 @@ class Connection implements ConnectionInterface
      */
     public function executeCommand($command, $no_sudo = false)
     {
-        LogEntry::logEntry('Executing command ' . $command);
+        if ($this->verbosity) {
+            LogEntry::logEntry('Executing command ' . $command);
+        }
+
         $stream = ssh2_exec(
             $this->getConnection(),
             ($this->isSudoAll() && !$no_sudo ? 'sudo ' : '' ) . $command ,
@@ -134,7 +156,11 @@ class Connection implements ConnectionInterface
     public function getFileContents($file)
     {
         $temp_file = tempnam($this->getTemporaryDirectoryPath(),"");
-        LogEntry::logEntry('Temp file: ' . $temp_file);
+
+        if ($this->verbosity) {
+            LogEntry::logEntry('Temp file: ' . $temp_file);
+        }
+
         if(ssh2_scp_recv($this->getConnection(), $file, $temp_file)){
             $contents = file_get_contents($temp_file);
         }else{
@@ -162,7 +188,10 @@ class Connection implements ConnectionInterface
      */
     public function writeFileContents($file, $contents, $mode=0644)
     {
-        LogEntry::logEntry('Writing file: ' . $file);
+        if ($this->verbosity) {
+            LogEntry::logEntry('Writing file: ' . $file);
+        }
+
         $temp_file = tempnam($this->getTemporaryDirectoryPath(), "");
         file_put_contents($temp_file, $contents);
         ssh2_scp_send($this->getConnection(), $temp_file, $file, $mode);
