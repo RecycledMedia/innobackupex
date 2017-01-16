@@ -306,7 +306,9 @@ class Mysql
 
         // Defaults to chown -R mysql.mysql /var/lib/mysql
 
+        $this->getConnection()->setSudoAll(true);
         $response = $this->getConnection()->executeCommand($command);
+        $this->getConnection()->setSudoAll(false);
 
         LogEntry::logEntry('STDOUT: ' . $response->stdout());
         LogEntry::logEntry('STDERR: ' . $response->stderr());

@@ -3,6 +3,7 @@
 namespace Tradesy\Innobackupex\LocalShell;
 
 use Tradesy\Innobackupex\ConnectionResponse;
+use Tradesy\Innobackupex\LogEntry;
 
 /**
  * Class Connection
@@ -15,6 +16,11 @@ class Connection implements \Tradesy\Innobackupex\ConnectionInterface
      * @var bool
      */
     protected $sudo_all = false;
+
+    /**
+     * @var bool
+     */
+    protected $verbosity = true;
 
     /**
      * @return boolean
@@ -54,6 +60,10 @@ class Connection implements \Tradesy\Innobackupex\ConnectionInterface
      */
     public function executeCommand($command, $no_sudo = false )
     {
+        if ($this->verbosity) {
+            LogEntry::logEntry('Executing command ' . $command);
+        }
+
         $command = ($this->isSudoAll() && !$no_sudo ? "sudo " : "" ) . $command;
 
         // Hacky way to get stderr, but proc_open seems to block indefinitely
@@ -122,8 +132,7 @@ class Connection implements \Tradesy\Innobackupex\ConnectionInterface
      * @param string $file
      * @return boolean
      */
-    public
-    function file_exists($file){
+    public function file_exists($file){
         return file_exists($file);
     }
 
@@ -137,11 +146,15 @@ class Connection implements \Tradesy\Innobackupex\ConnectionInterface
 
     public function mute()
     {
-        // TODO: Implement mute() method.
+        $this->verbosity = false;
+
+        return $this;
     }
 
     public function unmute()
     {
-        // TODO: Implement unmute() method.
+        $this->verbosity = true;
+
+        return $this;
     }
 }

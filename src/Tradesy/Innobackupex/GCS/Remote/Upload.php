@@ -74,9 +74,11 @@ class Upload implements SaveInterface {
             $this->bucket . "/" . 
             $this->key;
         LogEntry::logEntry($command);
+        $this->connection->setSudoAll(true);
         $response = $this->connection->executeCommand(
             $command
         );
+        $this->connection->setSudoAll(false);
         LogEntry::logEntry('STDOUT: ' . $response->stdout());
         LogEntry::logEntry('STDERR: ' . $response->stderr());
 
