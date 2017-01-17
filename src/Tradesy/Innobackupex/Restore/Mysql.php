@@ -214,7 +214,7 @@ class Mysql
          */
         LogEntry::logEntry('Chowning mysql directory');
         $this->ChownDirectory();
-        
+
         /*
          * The end.
          */
@@ -269,9 +269,11 @@ class Mysql
                 : "");
 
         LogEntry::logEntry('Backup Command: ' . $command);
+        $this->getConnection()->setSudoAll(true);
         $response = $this->connection->executeCommand(
             $command, true
         );
+        $this->getConnection()->setSudoAll(false);
 
         LogEntry::logEntry('STDOUT: ' . $response->stdout());
         LogEntry::logEntry('STDERR: ' . $response->stderr());
@@ -289,7 +291,9 @@ class Mysql
             " --copy-back $base_dir ";
 
         LogEntry::logEntry('Running Command: ' . $command);
+        $this->getConnection()->setSudoAll(true);
         $response = $this->getConnection()->executeCommand($command);
+        $this->getConnection()->setSudoAll(false);
 
         LogEntry::logEntry('STDOUT: ' . $response->stdout());
         LogEntry::logEntry('STDERR: ' . $response->stderr());
