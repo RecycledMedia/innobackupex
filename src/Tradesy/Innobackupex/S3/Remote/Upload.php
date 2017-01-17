@@ -75,7 +75,7 @@ class Upload implements SaveInterface {
             " s3 sync $filename s3://" . 
             $this->bucket . 
             "/" . 
-            $this->key;
+            $this->key . ' --only-show-errors';
         LogEntry::logEntry($command);
         $this->connection->setSudoAll(true);
         $response = $this->connection->executeCommand(
