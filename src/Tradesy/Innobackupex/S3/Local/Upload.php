@@ -3,8 +3,6 @@
 namespace Tradesy\Innobackupex\S3\Local;
 
 use \Aws\S3\S3Client;
-use \Aws\S3\MultipartUploader;
-use \Aws\Exception\MultipartUploadException;
 use Tradesy\Innobackupex\LogEntry;
 
 class Upload implements \Tradesy\Innobackupex\SaveInterface
