@@ -2,11 +2,11 @@
 
 namespace Tradesy\Innobackupex\S3\Local;
 
+use Aws\S3\S3Client;
 use Tradesy\Innobackupex\LogEntry;
 use \Tradesy\Innobackupex\LoadInterface;
 use \Tradesy\Innobackupex\ConnectionInterface;
 use \Tradesy\Innobackupex\Exceptions\BucketNotFoundException;
-use \Aws\Sdk;
 
 class Download implements LoadInterface
 {
@@ -44,11 +44,10 @@ class Download implements LoadInterface
         $this->region = $region;
         $this->concurrency = $concurrency;
 
-        $sdk = new Sdk([
+        $this->client = new S3Client([
             'region' => $this->region,
             'version' => self::AWS_S3_API_VERSION
         ]);
-        $this->client = $sdk->createS3();
         $this->testSave();
 
     }
