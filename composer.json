@@ -16,7 +16,7 @@
         }
     },
     "require": {
-      "aws/aws-sdk-php": "2.*",
-      "google/apiclient": "dev-master"
+        "aws/aws-sdk-php": "3.91.0",
+        "google/apiclient": "dev-master"
     }
 }

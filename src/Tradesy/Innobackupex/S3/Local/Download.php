@@ -2,16 +2,15 @@
 
 namespace Tradesy\Innobackupex\S3\Local;
 
+use Aws\S3\S3Client;
 use Tradesy\Innobackupex\LogEntry;
-use \Tradesy\Innobackupex\SSH\Connection;
 use \Tradesy\Innobackupex\LoadInterface;
 use \Tradesy\Innobackupex\ConnectionInterface;
-use \Tradesy\Innobackupex\Exceptions\CLINotFoundException;
 use \Tradesy\Innobackupex\Exceptions\BucketNotFoundException;
-use \Aws\S3\S3Client;
 
 class Download implements LoadInterface
 {
+    const AWS_S3_API_VERSION = '2006-03-01';
 
     /**
      * @var \Aws\S3\S3Client
@@ -44,8 +43,10 @@ class Download implements LoadInterface
         $this->bucket = $bucket;
         $this->region = $region;
         $this->concurrency = $concurrency;
-        $this->client = S3Client::factory([
-            "region" => $this->region
+
+        $this->client = new S3Client([
+            'region' => $this->region,
+            'version' => self::AWS_S3_API_VERSION
         ]);
         $this->testSave();
 
