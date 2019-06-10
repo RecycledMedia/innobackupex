@@ -74,7 +74,7 @@ class Download implements LoadInterface
         LogEntry::logEntry('Saving to: '  . $path_to);
         try {
             $this->client->downloadBucket(
-                $info->getBaseBackupDirectory() . DIRECTORY_SEPARATOR . $filename,
+                $path_to . $filename,
                 $this->bucket,
                 DIRECTORY_SEPARATOR . $info->getRepositoryBaseName() . DIRECTORY_SEPARATOR . $filename,
                 [
