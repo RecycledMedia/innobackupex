@@ -80,7 +80,7 @@ class Download implements LoadInterface
                 [
                     "allow_resumable" => false,
                     "concurrency" => $this->concurrency,
-                    "base_dir" => $path_to . $filename,
+                    "base_dir" => $info->getRepositoryBaseName() . DIRECTORY_SEPARATOR . $filename,
                     "debug" => true,
                     "before" => function(Command $command) use ($path_to) {
                         // extract file name from key
