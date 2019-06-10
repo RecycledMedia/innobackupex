@@ -84,8 +84,7 @@ class Download implements LoadInterface
                     "debug" => true,
                     "before" => function(Command $command) use ($path_to) {
                         // extract file name from key
-                        $parts = explode('/', $command['Key']);
-                        $file_name = end($parts);
+                        $file_name = basename($command['Key']);
 
                         // touch file
                         touch($path_to . $file_name);
