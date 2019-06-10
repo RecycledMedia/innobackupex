@@ -2,6 +2,7 @@
 
 namespace Tradesy\Innobackupex\S3\Local;
 
+use Aws\Command;
 use Aws\S3\S3Client;
 use Tradesy\Innobackupex\LogEntry;
 use \Tradesy\Innobackupex\LoadInterface;
@@ -66,19 +67,29 @@ class Download implements LoadInterface
 
     public function load(\Tradesy\Innobackupex\Backup\Info $info, $filename)
     {
+        $path_to = $info->getBaseBackupDirectory() . DIRECTORY_SEPARATOR;
+
         //$filename = $info->getLatestFullBackup();
         LogEntry::logEntry('Downloading ' . $filename);
-        LogEntry::logEntry('Saving to: '  . $info->getBaseBackupDirectory() . DIRECTORY_SEPARATOR);
+        LogEntry::logEntry('Saving to: '  . $path_to);
         try {
             $this->client->downloadBucket(
                 $info->getBaseBackupDirectory() . DIRECTORY_SEPARATOR . $filename,
                 $this->bucket,
-                DIRECTORY_SEPARATOR . $info->getRepositoryBaseName() . DIRECTORY_SEPARATOR . $filename,
+                DIRECTORY_SEPARATOR . $path_to . $filename,
                 [
                     "allow_resumable" => false,
                     "concurrency" => $this->concurrency,
-                    "base_dir" => $info->getRepositoryBaseName() . DIRECTORY_SEPARATOR . $filename,
-                    "debug" => true
+                    "base_dir" => $path_to . $filename,
+                    "debug" => true,
+                    "before" => function(Command $command) use ($path_to) {
+                        // extract file name from key
+                        $parts = explode('/', $command['Key']);
+                        $file_name = end($parts);
+
+                        // touch file
+                        touch($path_to . $file_name);
+                    }
                 ]
             );
         }catch(\Exception $e){
