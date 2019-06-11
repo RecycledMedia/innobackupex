@@ -83,6 +83,7 @@ class Download implements LoadInterface
                     "base_dir" => $key_prefix . DIRECTORY_SEPARATOR . $filename,
                     "debug" => true,
                     "before" => function (Command $command) use ($path_to, $key_prefix) {
+                        # swap out s3 base directory for local target directory
                         $target_file_name = substr_replace($command['Key'], $path_to, 0, strlen($key_prefix));
 
                         # make sure any nested dirs exist first
