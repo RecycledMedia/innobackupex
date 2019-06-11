@@ -67,31 +67,35 @@ class Download implements LoadInterface
 
     public function load(\Tradesy\Innobackupex\Backup\Info $info, $filename)
     {
-        $path_to = $info->getBaseBackupDirectory() . DIRECTORY_SEPARATOR;
+        $path_to = $info->getBaseBackupDirectory();
+        $key_prefix = $info->getRepositoryBaseName();
 
-        //$filename = $info->getLatestFullBackup();
         LogEntry::logEntry('Downloading ' . $filename);
-        LogEntry::logEntry('Saving to: '  . $path_to);
+        LogEntry::logEntry('Saving to: ' . $path_to);
         try {
             $this->client->downloadBucket(
-                $path_to . $filename,
+                $path_to . DIRECTORY_SEPARATOR . $filename,
                 $this->bucket,
-                DIRECTORY_SEPARATOR . $info->getRepositoryBaseName() . DIRECTORY_SEPARATOR . $filename,
+                DIRECTORY_SEPARATOR . $key_prefix . DIRECTORY_SEPARATOR . $filename,
                 [
                     "allow_resumable" => false,
                     "concurrency" => $this->concurrency,
-                    "base_dir" => $info->getRepositoryBaseName() . DIRECTORY_SEPARATOR . $filename,
+                    "base_dir" => $key_prefix . DIRECTORY_SEPARATOR . $filename,
                     "debug" => true,
-                    "before" => function(Command $command) use ($path_to) {
-                        // extract file name from key
-                        $file_name = basename($command['Key']);
+                    "before" => function (Command $command) use ($path_to, $key_prefix) {
+                        $target_file_name = substr_replace($command['Key'], $path_to, 0, strlen($key_prefix));
 
-                        // touch file
-                        touch($path_to . $file_name);
+                        # make sure any nested dirs exist first
+                        $file_dir = dirname($target_file_name);
+                        if (!is_dir($file_dir)) {
+                            mkdir($file_dir, 007, true);
+                        }
+
+                        touch($target_file_name);
                     }
                 ]
             );
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             LogEntry::logEntry('Exception caught ' . $e->getMessage());
         }
         return;
