@@ -58,7 +58,7 @@ class Incremental extends AbstractBackup
             " --password={MYSQL_PASSWORD}" .
             " --host=" . $host .
             " --port=" . $port .
-            " --parallel=100" .
+            " --parallel=" . $this->parallel_threads .
             " --no-timestamp" .
             ($this->getCompress() ?
                 " --compress --compress-threads=" . $this->compress_threads : "") .
