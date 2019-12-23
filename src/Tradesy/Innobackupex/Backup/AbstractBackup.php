@@ -129,7 +129,7 @@ abstract class AbstractBackup
         EncryptionConfiguration $enc_config = null,
         $compress = false,
         $compress_threads = 100,
-        $paralle_threads = 100,
+        $parallel_threads = 100,
         $encrypt_threads = 100,
         $memory = "1G",
         $base_backup_directory = "/tmp",
@@ -141,7 +141,7 @@ abstract class AbstractBackup
         $this->encryption_configuration = $enc_config;
         $this->compress = $compress;
         $this->compress_threads = $compress_threads;
-        $this->parallel_threads = $paralle_threads;
+        $this->parallel_threads = $parallel_threads;
         $this->encrypt_threads = $encrypt_threads;
         $this->memory = $memory;
         $this->base_backup_directory = $base_backup_directory;
