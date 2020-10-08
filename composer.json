@@ -16,7 +16,13 @@
         }
     },
     "require": {
+        "php": "~7.2.24",
         "aws/aws-sdk-php": "3.91.0",
         "google/apiclient": "dev-master"
+    },
+    "config": {
+        "platform": {
+            "php": "7.2.24"
+        }
     }
 }
